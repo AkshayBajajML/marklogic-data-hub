@@ -272,9 +272,9 @@ export const testMatchingActivity = {
   ],
   "actionPreview": [
     {
-      "name": "sameThreshold",
+      "name": "Match",
       "action": "merge",
-      "score": "15",
+      "score": "118",
       "entityNames": [
         "Customer11",
         "Customer12"
@@ -284,15 +284,17 @@ export const testMatchingActivity = {
         "/content/CustMatchMerge2.json"
       ],
       "matchRulesets": [
-        "billingAddress",
-        "customerId",
-        "name",
-        "shippingAddress"
-      ]
+        "lname - Exact",
+        "fname - Double Metaphone",
+        "fname - Synonym",
+        "DateOfBirth - Custom",
+        "ZipCode - Zip",
+        "Address - Reduce"
+      ],
     },
     {
-      "name": "testSecondCustomAction",
-      "action": "custom",
+      "name": "Match",
+      "action": "merge",
       "score": "9.5",
       "entityNames": [
         "Customer1",
@@ -308,8 +310,8 @@ export const testMatchingActivity = {
       ]
     },
     {
-      "name": "similarThreshold",
-      "action": "notify",
+      "name": "Match",
+      "action": "merge",
       "score": "7.5",
       "entityNames": [
         "Customer1",
@@ -325,7 +327,7 @@ export const testMatchingActivity = {
       ]
     },
     {
-      "name": "similarThreshold",
+      "name": "Likely Match",
       "action": "notify",
       "score": "7.5",
       "entityNames": [
@@ -342,7 +344,7 @@ export const testMatchingActivity = {
       ]
     },
     {
-      "name": "testSecondCustomAction",
+      "name": "Likely Match",
       "action": "custom",
       "score": "9.5",
       "entityNames": [
@@ -359,7 +361,7 @@ export const testMatchingActivity = {
       ]
     },
     {
-      "name": "similarThreshold",
+      "name": "Likely Match",
       "action": "notify",
       "score": "7.5",
       "entityNames": [
@@ -376,7 +378,7 @@ export const testMatchingActivity = {
       ]
     },
     {
-      "name": "household",
+      "name": "Slight Match",
       "action": "custom",
       "score": "8.5",
       "entityNames": [

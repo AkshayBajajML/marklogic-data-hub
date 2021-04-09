@@ -2,6 +2,24 @@
   padding-bottom: 10px;
 }
 
+.checkIcon {
+  font-size: 17px;
+  color: #00b300;
+}
+
+.testMatchedColumns{
+    margin-left: 50%;
+}
+
+.rulesetColumn{
+  font-weight: bold;
+}
+
+.boldTextDisplay{
+  font-weight: bold;
+  margin-left: 92%;
+}
+
 .headerDescription {
   padding: 0 0 10px 57px;
 }
@@ -185,7 +203,7 @@
     padding-top: 20px;
     width: 90.7vw;
     overflow-y: auto;
-    max-height: 30vh;
+    max-height: 60vh;
     margin-left: 1vw;
 }
 
@@ -193,13 +211,18 @@
     border-top: 1px solid #e8e8e8;
 }
 
+.UriMatchTableContent {
+    border-top: 1px solid #e8e8e8;
+    margin-top: 3vh;
+}
 .tableRow {
     display: flex;
     height: 1em;
 }
 
 .testMatchedTableRow {
-    height: 1em;
+    height: 2em;
+    color: #5b69af;
 }
 
 .deleteIcon {
@@ -243,6 +266,62 @@
 }
 
 .matchedUriRow{
-    margin-top: 2vh;
-    margin-left: 1.9vw;
+    vertical-align: sub;
+    color: #5b69af;
+}
+
+.expandCollapseIcon{
+    font-size: 11px;
+    margin-left: 96%;
+    margin-bottom: 2vh;
+}
+
+.modalTitleLegend {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    margin-top: -40px;
+    margin-bottom: 10px;
+    //vertical-align: bottom ;
+
+    .legendText {
+        font-size: 13px;
+        margin-left: 15px;
+        margin-bottom: 2.5vh;
+    }
+
+    .expandCollapseIcon{
+        font-size: 11px;
+        margin-left: 5em;
+        margin-top: 4vh;
+        margin-right: 2em;
+    }
+}
+
+.structuredIcon {
+    color: #5B69AF;
+    font-size: 14px;
+}
+
+.compareButton {
+    float: right;
+    margin-right: 1em;
+}
+
+.testMatchedHeading {
+    font-weight: bold;
+    margin-bottom: 1vh;
+    margin-left: -4.2vw;
+}
+
+.matchRulesetStyle {
+    color: #5b69af;
+    margin-left: 2vw;
+}
+
+.toggleIcon {
+    padding-right: 2vw;
+    font-size: 14px;
+    color: #5b69af;
+    cursor: pointer;
 }

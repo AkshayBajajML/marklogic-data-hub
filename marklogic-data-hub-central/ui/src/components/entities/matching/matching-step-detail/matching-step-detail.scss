@@ -2,6 +2,16 @@
     display: none;
 }
 
+//#uriDataHidePointer .ant-table-thead{
+//    display: none;
+//}
+//
+//#uriDataHidePointer .ant-table-row-expand-icon-cell{
+//    display: none;
+//}
+.ant-table-row-expand-icon-cell{
+    color: #5b69af;
+}
 #addDataRadio .ant-radio-wrapper{
     white-space: normal;
 }
@@ -19,3 +29,21 @@
     border: solid 1px #ddd;
 }
 
+#uriMatchedDataTable td:nth-child(2n){
+    background-color: #f1f1f1;
+}
+
+#uriMatchedDataTable .ant-table-thead{
+    text-align-last: center;
+    display: contents !important;
+}
+
+#uriMatchedDataTable th:nth-child(1){
+    text-align-last: left;
+}
+
+.ml-table td.ant-table-row-expand-icon-cell {
+    background-color: white !important;
+    padding-left: 3vw !important;
+    padding-top: 3vh !important;
+}

@@ -1,7 +1,8 @@
 import React, {useState, useEffect, useContext} from "react";
-import {Modal, Row, Col, Card, Menu, Dropdown, Icon} from "antd";
+import {Modal, Row, Col, Card, Menu, Dropdown, Progress, Icon, Collapse} from "antd";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faPlusSquare} from "@fortawesome/free-solid-svg-icons";
+import arrayIcon from "../../../../assets/icon_array.png";
+import {faCheck, faLayerGroup, faPlusSquare} from "@fortawesome/free-solid-svg-icons";
 import {faTrashAlt} from "@fortawesome/free-regular-svg-icons";
 import {useHistory} from "react-router-dom";
 import {MLButton, MLTable, MLInput, MLRadio, MLTooltip} from "@marklogic/design-system";
@@ -20,6 +21,7 @@ import {MatchingStep} from "../../../../types/curation-types";
 import {MatchingStepDetailText} from "../../../../config/tooltips.config";
 import {updateMatchingArtifact, calculateMatchingActivity, previewMatchingActivity} from "../../../../api/matching";
 import {DownOutlined} from "@ant-design/icons";
+import ExpandCollapse from "../../../expand-collapse/expand-collapse";
 
 const DEFAULT_MATCHING_STEP: MatchingStep = {
   name: "",
@@ -75,6 +77,11 @@ const MatchingStepDetail: React.FC = () => {
   const [testMatchedData, setTestMatchedData] = useState<any>({stepName: "", sampleSize: 10, uris: []});
   const [previewMatchedActivity, setPreviewMatchedActivity]   = useState<any>({sampleSize: 10, uris: [], actionPreview: []});
   const [showRulesetMultipleModal, toggleShowRulesetMultipleModal] = useState(false);
+  const [show, toggleShow] = useState(true);
+  const [matchedUrisExpandedKeys, setMatchedUrisExpandedKeys] = useState<any[]>([]);
+  const [matchedUrisExpandedFlag, setMatchedUrisExpandedFlag] = useState(false);
+  const [activeKey, setActiveKey] = useState("");
+  let counter = 0;
 
   const menu = (
     <Menu>
@@ -122,6 +129,7 @@ const MatchingStepDetail: React.FC = () => {
   const handlePreviewMatchingActivity = async (testMatchData) => {
     let previewMatchActivity = await previewMatchingActivity(testMatchData);
     setPreviewMatchedActivity(previewMatchActivity);
+      setTestMatchedData({stepName: "", sampleSize: 100, uris: []});
   };
 
   const matchRuleSetOptions = matchingStep.matchRulesets && matchingStep.matchRulesets.map((i) => {
@@ -309,11 +317,175 @@ const MatchingStepDetail: React.FC = () => {
   });
 
   const renderTestMatchUriData = previewMatchedActivity.actionPreview.map((testMatchedUriData, index) => {
+    for(let i=0;i<curationOptions.activeStep.stepArtifact.thresholds.length;i++){
+        if(curationOptions.activeStep.stepArtifact.thresholds[i].thresholdName === testMatchedUriData.name && curationOptions.activeStep.stepArtifact.thresholds[i].action === testMatchedUriData.action){
+            testMatchedUriData.threshholdValue =  curationOptions.activeStep.stepArtifact.thresholds[i].score;
+        }
+    }
     return {
       key: index,
       uriTestMatchValue: testMatchedUriData,
     };
   });
+
+  // const renderTestMatchUriTableData = previewMatchedActivity.actionPreview.map((testMatchedUriData, index) => {
+  //     return {
+  //         key: index,
+  //         ruleset: testMatchedUriData.matchRulesets,
+  //         matchScore: testMatchedUriData.score,
+  //         // uriTestMatchValue: testMatchedUriData,
+  //     };
+  // });
+  //
+  // const uid = () => {
+  //     counter++;
+  //     return counter.toString();
+  // }
+  const testMatchedUriTableColumns = [
+    {
+      title: "Ruleset",
+      dataIndex: "ruleName",
+      key: "ruleName "+ (counter++),
+      width: "16%",
+      render: (ruleName, key) => (ruleName.map(property => {
+        return <span className={styles.rulesetColumn} key={key}>{property}
+        </span>;
+      }))
+    },
+    {
+      title: "Exact",
+      dataIndex: "matchedRulesetType",
+      key: "matchedRulesetType " + (counter++) + " exact",
+      width: "6%",
+      render: (matchedRulesetType, key) => (matchedRulesetType.map(rulesetType => {
+        return (rulesetType === "Exact") && <span className={styles.testMatchedColumns} key={key}>
+          <FontAwesomeIcon className={styles.checkIcon} icon={faCheck} data-testid={"facet-" + rulesetType} />
+        </span>;
+      }))
+    },
+    {
+      title: "Synonym",
+      dataIndex: "matchedRulesetType",
+      key: "matchedRulesetType " + (counter++) + " synonym",
+      width: "8%",
+      render: (matchedRulesetType, key) => (matchedRulesetType.map(rulesetType => {
+        return (rulesetType === "Synonym") && <span className={styles.testMatchedColumns} key={key}>
+          <FontAwesomeIcon className={styles.checkIcon} icon={faCheck} data-testid={"facet-" + rulesetType}/>
+        </span>;
+      }))
+    },
+    {
+      title: "Double Metaphone",
+      dataIndex: "matchedRulesetType",
+      width: "10%",
+      key: "matchedRulesetType " + (counter++) + " metaphone",
+      render: (matchedRulesetType, key) => (matchedRulesetType.map(rulesetType => {
+        return (rulesetType === "Double Metaphone") && <span className={styles.testMatchedColumns} key={key}>
+          <FontAwesomeIcon className={styles.checkIcon} icon={faCheck} data-testid={"facet-" + rulesetType}/>
+        </span>;
+      }))
+    },
+    {
+      title: "Zip",
+      dataIndex: "matchedRulesetType",
+      key: "matchedRulesetType " + (counter++) + " zip",
+      width: "6%",
+      render: (matchedRulesetType, key) => (matchedRulesetType.map(rulesetType => {
+        return (rulesetType === "Zip") && <span className={styles.testMatchedColumns} key={key}>
+          <FontAwesomeIcon className={styles.checkIcon} icon={faCheck} data-testid={"facet-" + rulesetType}/>
+        </span>;
+      }))
+    },
+    {
+      title: "Reduce",
+      dataIndex: "matchedRulesetType",
+      key: "matchedRulesetType " + (counter++) + " reduce",
+      width: "7%",
+      render: (matchedRulesetType, key) => (matchedRulesetType.map(rulesetType => {
+        return (rulesetType === "Reduce") && <span className={styles.testMatchedColumns} key={key}>
+          <FontAwesomeIcon className={styles.checkIcon} icon={faCheck} data-testid={"facet-" + rulesetType}/>
+        </span>;
+      }))
+    },
+    {
+      title: "Custom",
+      dataIndex: "matchedRulesetType",
+      key: "matchedRulesetType " + (counter++) + " custom",
+      width: "8%",
+      render: (matchedRulesetType, key) => (matchedRulesetType.map(rulesetType => {
+        return (rulesetType === "Custom") && <span className={styles.testMatchedColumns} key={key}>
+          <FontAwesomeIcon className={styles.checkIcon} icon={faCheck} data-testid={"facet-" + rulesetType}/>
+        </span>;
+      }))
+    },
+    {
+      title: "Match Score",
+      dataIndex: "scores[0]",
+      key: "matchedRulesetType " + (counter++) + " score",
+      width: "15%",
+      render: (score, key) =>  <span key={key}>
+        <Progress percent={score} strokeWidth={20} strokeColor={"#00b300"} format={percent => `${percent}`} strokeLinecap={"square"}/>
+      </span>
+    }
+  ];
+
+  const expandedRowRender = (rowId) => {
+    let allRuleset = curationOptions.activeStep.stepArtifact.matchRulesets;
+    let actionPreviewData = rowId.uriTestMatchValue.matchRulesets.map(matchRulseset => {
+      let matchedRulesetProperty: string[] = [];
+      let matchedRulesetType: string[] = [];
+      let scores: string[] = [];
+      let ruleName: string[] = [];
+      let key= counter++;
+      ruleName.push(matchRulseset);
+      let ruleset = matchRulseset.split(" - ");
+      matchedRulesetProperty.push(ruleset[0]);
+      matchedRulesetType.push(ruleset[1]);
+      for (let i=0;i<allRuleset.length;i++) {
+        if (matchRulseset === allRuleset[i].name) {
+          scores.push(allRuleset[i].weight);
+        }
+      }
+      let data = {
+        matchedRulesetProperty: matchedRulesetProperty,
+        matchedRulesetType: matchedRulesetType,
+        ruleName: ruleName,
+        scores: scores,
+        key: key,
+      };
+      return data;
+    });
+    ++counter;
+    return <div><MLTable
+      columns={testMatchedUriTableColumns}
+      dataSource={actionPreviewData}
+      pagination={false}
+      rowKey="key"
+      id="uriMatchedDataTable"
+    ></MLTable><span className={styles.boldTextDisplay}> Total Score: {rowId.uriTestMatchValue.score}</span></div>;
+  };
+  const getKeysToExpandFromTable = (dataArr, rowKey, allKeysToExpand:any = [], expanded?) => {
+    dataArr.forEach(obj => {
+      if (obj.hasOwnProperty("children")) {
+        allKeysToExpand.push(obj[rowKey]);
+        if ((rowKey === "key" && (expanded)) || (rowKey === "rowKey" && (expanded))) {
+          getKeysToExpandFromTable(obj["children"], rowKey, allKeysToExpand);
+        }
+      }
+    });
+    return allKeysToExpand;
+  };
+
+  // const handleSourceExpandCollapse = (option) => {
+  //     let keys = getKeysToExpandFromTable(sourceData, "rowKey", [], true);
+  //     if (option === "collapse") {
+  //         setMatchedUrisExpandedKeys([]);
+  //         setMatchedUrisExpandedFlag(false);
+  //     } else {
+  //         setMatchedUrisExpandedKeys([...keys]);
+  //         setMatchedUrisExpandedFlag(true);
+  //     }
+  // };
 
   const UriColumns = [{
     key: "uriValue",
@@ -332,9 +504,12 @@ const MatchingStepDetail: React.FC = () => {
     dataIndex: "uriTestMatchValue",
     render: (text) => (
       <div>
-        <MLTooltip placement="topLeft" title={text.uris[0]}><span className={styles.testMatchedTableRow}><Icon className={styles.expandableIcon} type="right" />
-          {text.entityNames[0]}</span></MLTooltip><br /><br />
-        <MLTooltip placement="top" title={text.uris[1]}><span className={styles.matchedUriRow}>{text.entityNames[1]}</span></MLTooltip>
+        <div className={styles.testMatchedHeading}><span>
+        <span className={styles.matchRulesetStyle}>{text.name} - {text.action}</span></span> (Threshold: {text.threshholdValue} )</div>
+          <span><MLTooltip placement="topLeft" title={text.uris[0]}><span className={styles.testMatchedTableRow}>
+          {text.entityNames[0] }</span><span className={styles.rulesetColumn}>&nbsp;&nbsp;(Score: {text.score})</span></MLTooltip>
+          <MLButton type="primary" size="default" className={styles.compareButton}>Compare</MLButton><br />
+          <MLTooltip placement="top" title={text.uris[1]}><span className={styles.matchedUriRow}>{text.entityNames[1]}</span></MLTooltip></span>
       </div>
     )
   }];
@@ -390,6 +565,10 @@ const MatchingStepDetail: React.FC = () => {
     setInputUriDisabled(false);
     setAllDataSelected(false);
     setUriTestMatchClicked(false);
+  };
+
+  const handleExpandCollapse = () => {
+    //Logic to be added during dedicated story for expand collapse icons
   };
 
   return (
@@ -550,16 +729,24 @@ const MatchingStepDetail: React.FC = () => {
             <Menu.Item key="notMatched">Not Matched</Menu.Item>
           </Menu>
         </div>
-        {previewMatchedActivity.actionPreview.length > 0 && testMatchTab === "matched" && uriTestMatchClicked ? <div className={styles.UriMatchedDataTable}>
-          <MLTable
-            columns={testMatchedUriColumns}
-            className={styles.tableContent}
-            dataSource={renderTestMatchUriData}
-            rowKey="key"
-            id="uriData"
-            pagination={false}
-          />
-        </div> : ""}
+        {previewMatchedActivity.actionPreview.length > 0 && testMatchTab === "matched" && uriTestMatchClicked ?
+          <div className={styles.UriMatchedDataTable}>
+            <div className={styles.modalTitleLegend} aria-label="modalTitleLegend">
+              <div className={styles.legendText}><img className={styles.arrayImage} src={arrayIcon}/> Multiple</div>
+              <div className={styles.legendText}><FontAwesomeIcon className={styles.structuredIcon} icon={faLayerGroup}/> Structured Type</div>
+              <div className={styles.expandCollapseIcon}><ExpandCollapse handleSelection={handleExpandCollapse} currentSelection={""} /></div>
+            </div>
+            <MLTable
+              columns={testMatchedUriColumns}
+              className={styles.tableContent}
+              expandedRowRender={expandedRowRender}
+              dataSource={renderTestMatchUriData}
+              rowKey="key"
+              id="uriData"
+              pagination={false}
+            // expandedRowKeys={matchedUrisExpandedKeys}
+            />
+          </div> : ""}
       </div>
       <RulesetSingleModal
         isVisible={showRulesetSingleModal}
