@@ -12,7 +12,6 @@ interface Props {
   tableView: boolean;
 }
 
-
 const ExpandableTableView: React.FC<Props> = (props) => {
 
   const {

@@ -2,13 +2,6 @@
     display: none;
 }
 
-//#uriDataHidePointer .ant-table-thead{
-//    display: none;
-//}
-//
-//#uriDataHidePointer .ant-table-row-expand-icon-cell{
-//    display: none;
-//}
 .ant-table-row-expand-icon-cell{
     color: #5b69af;
 }
@@ -40,10 +33,4 @@
 
 #uriMatchedDataTable th:nth-child(1){
     text-align-last: left;
-}
-
-.ml-table td.ant-table-row-expand-icon-cell {
-    background-color: white !important;
-    padding-left: 3vw !important;
-    padding-top: 3vh !important;
 }

@@ -7,17 +7,12 @@
   color: #00b300;
 }
 
-.testMatchedColumns{
+.testMatchedColumns {
     margin-left: 50%;
 }
 
-.rulesetColumn{
+.rulesetColumn {
   font-weight: bold;
-}
-
-.boldTextDisplay{
-  font-weight: bold;
-  margin-left: 92%;
 }
 
 .headerDescription {
@@ -28,14 +23,13 @@
   display: flex;
   margin-bottom: 10px;
 
-  .stepText {
-    margin: 8px 0 0 12px;
-  }
+.stepText {
+  margin: 8px 0 0 12px;
+}
 }
 
 .matchingDetailContainer {
   padding: 20px;
-
   .bold {
     font-weight: bold;
   }
@@ -211,10 +205,6 @@
     border-top: 1px solid #e8e8e8;
 }
 
-.UriMatchTableContent {
-    border-top: 1px solid #e8e8e8;
-    margin-top: 3vh;
-}
 .tableRow {
     display: flex;
     height: 1em;
@@ -223,6 +213,7 @@
 .testMatchedTableRow {
     height: 2em;
     color: #5b69af;
+    margin-left: -0.15vw;
 }
 
 .deleteIcon {
@@ -259,18 +250,13 @@
     margin: 1vh 0vh -0.5vh 1.3vw;
 }
 
-.expandableIcon {
-    font-size: 15px;
-    margin-right: 1vw;
-    cursor: pointer
-}
-
-.matchedUriRow{
+.matchedUriRow {
     vertical-align: sub;
     color: #5b69af;
+    margin-left: 3vw;
 }
 
-.expandCollapseIcon{
+.expandCollapseIcon {
     font-size: 11px;
     margin-left: 96%;
     margin-bottom: 2vh;
@@ -290,7 +276,7 @@
         margin-bottom: 2.5vh;
     }
 
-    .expandCollapseIcon{
+    .expandCollapseIcon {
         font-size: 11px;
         margin-left: 5em;
         margin-top: 4vh;
@@ -311,16 +297,24 @@
 .testMatchedHeading {
     font-weight: bold;
     margin-bottom: 1vh;
-    margin-left: -4.2vw;
+    margin-left: 0vw;
 }
 
 .matchRulesetStyle {
     color: #5b69af;
-    margin-left: 2vw;
+    margin-left: -1vw;
 }
 
 .toggleIcon {
     padding-right: 2vw;
+    font-size: 14px;
+    color: #5b69af;
+    cursor: pointer;
+}
+
+.toggleTableViewIcon {
+    padding-right: 0.5vw;
+    margin-left: 1.8vw;
     font-size: 14px;
     color: #5b69af;
     cursor: pointer;
