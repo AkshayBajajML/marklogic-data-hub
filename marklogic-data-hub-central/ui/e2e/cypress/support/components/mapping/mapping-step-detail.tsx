@@ -181,7 +181,19 @@ class MappingStepDetail {
   }
 
   successMessage() {
-    return cy.findByTestId("successMessage")
+    return cy.findByTestId("successMessage");
+  }
+
+  searchIcon() {
+    return cy.findByTestId("filterIcon-name");
+  }
+
+  searchName() {
+    return cy.findByTestId("searchInput-name");
+  }
+
+  searchButton() {
+    return cy.findByTestId("submitSearch-name");
   }
 }
 

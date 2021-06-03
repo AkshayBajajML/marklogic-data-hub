@@ -114,6 +114,12 @@ describe("Mapping", () => {
     mappingStepDetail.validateMapValue("Relation (relatedTo Person)", "relatedTo", "444-44-4440");
     mappingStepDetail.getURIValue("Relation (relatedTo Person)").trigger("mouseover");
     cy.contains("/Relation/444-44-4440.json");
+
+    // Search Name
+    mappingStepDetail.searchIcon().click();
+    mappingStepDetail.searchName().type("URI");
+    mappingStepDetail.searchName().click();
+    cy.contains("URI").should("have.length.gt", 2);
   });
   it("Create new flow, add mapping to flow, run mapping, verify results", () => {
     cy.waitUntil(() => toolbar.getRunToolbarIcon()).click();
@@ -128,7 +134,7 @@ describe("Mapping", () => {
     runPage.runStep("mapRelation");
     cy.verifyStepRunResult("success", "Mapping", "mapRelation");
     cy.waitForAsyncRequest();
-    
+
     // Navigate to Explore
     runPage.explorerLink().click();
     browsePage.waitForSpinnerToDisappear();
