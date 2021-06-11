@@ -83,11 +83,17 @@ describe("Mapping", () => {
     mappingStepDetail.entityTitle("Person").should("exist");
   });
   it("Verify related entities in mapping details with defaults", () => {
+    mappingStepDetail.XPathInfoIcon().trigger("mouseover");
+    cy.findByText("Documentation:").should("be.visible");
+    cy.waitUntil(() => mappingStepDetail.XPathInfoIcon().trigger("mouseout"));
     mappingStepDetail.entityTitle("Relation (relatedTo Person)").should("not.exist");
     cy.waitUntil(() => mappingStepDetail.relatedFilterMenu("Person")).click();
     cy.waitUntil(() => mappingStepDetail.getRelatedEntityFromList("Relation (relatedTo Person)")).click();
     mappingStepDetail.entityTitle("Person").click(); // click outside menu to close it
     mappingStepDetail.entityTitle("Relation (relatedTo Person)").should("exist");
+    mappingStepDetail.helpInfoIcon().trigger("mouseover");
+    mappingStepDetail.helpInfoContent().should("be.visible");
+    cy.waitUntil(() => mappingStepDetail.helpInfoIcon().trigger("mouseout"));
     mappingStepDetail.validateContextInput("Relation (relatedTo Person)", "/");
     mappingStepDetail.validateURIInput("Person", "$URI");
     mappingStepDetail.validateURIInput("Relation (relatedTo Person)", "hubURI('Relation')");
