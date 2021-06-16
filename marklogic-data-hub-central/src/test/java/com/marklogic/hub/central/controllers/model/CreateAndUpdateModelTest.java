@@ -35,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class CreateAndUpdateModelTest extends AbstractModelTest {
 
@@ -69,6 +70,19 @@ public class CreateAndUpdateModelTest extends AbstractModelTest {
     void testCreateNamespacedModel() {
         runAsTestUserWithRoles("hub-central-entity-model-writer");
         createNamespacedModel();
+    }
+
+    @Test
+    @WithMockUser(roles = {"writeEntityModel"})
+    void testUpdatedIndexes() {
+        runAsTestUserWithRoles("hub-central-entity-model-writer");
+        createModel();
+        addFacetableDateTimeProperty();
+        updateDataType();
+        getIndexes(false);
+        updateIndexes();
+        addProperty();
+        getIndexes(true);
     }
 
     private void createNamespacedModel() {
@@ -207,6 +221,101 @@ public class CreateAndUpdateModelTest extends AbstractModelTest {
         assertEquals("string", loadModel(getHubClient().getFinalClient()).get("definitions").get(MODEL_NAME).get("properties").get(ENTITY_PROPERTY_1).get("datatype").asText());
     }
 
+    private void addFacetableDateTimeProperty() {
+        Assumptions.assumeTrue(isVersionCompatibleWith520Roles());
+
+        String entityTypes = "[\n" +
+            "  {\n" +
+            "    \"entityName\": \"" + MODEL_NAME + "\",\n" +
+            "    \"modelDefinition\": {\n" +
+            "      \"Customer\": {\n" +
+            "        \"required\": [],\n" +
+            "        \"pii\": [\n" +
+            "          \"" + ENTITY_PROPERTY_1 + "\"\n" +
+            "        ],\n" +
+            "        \"elementRangeIndex\": [\n" +
+            "          \"" + ENTITY_PROPERTY_1 + "\"\n" +
+            "        ],\n" +
+            "        \"properties\": {\n" +
+            "          \"" + ENTITY_PROPERTY_1 + "\": {\n" +
+            "            \"datatype\": \"dateTime\",\n" +
+            "            \"facetable\": true,\n" +
+            "            \"collation\": \"http://marklogic.com/collation/codepoint\"\n" +
+            "          }\n" +
+            "        }\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }\n" +
+            "]";
+
+        controller.updateModelEntityTypes(readJsonArray(entityTypes));
+    }
+
+    private void updateDataType() {
+        Assumptions.assumeTrue(isVersionCompatibleWith520Roles());
+
+        String entityTypes = "[\n" +
+            "  {\n" +
+            "    \"entityName\": \"" + MODEL_NAME + "\",\n" +
+            "    \"modelDefinition\": {\n" +
+            "      \"Customer\": {\n" +
+            "        \"required\": [],\n" +
+            "        \"pii\": [\n" +
+            "          \"" + ENTITY_PROPERTY_1 + "\"\n" +
+            "        ],\n" +
+            "        \"elementRangeIndex\": [\n" +
+            "          \"" + ENTITY_PROPERTY_1 + "\"\n" +
+            "        ],\n" +
+            "        \"properties\": {\n" +
+            "          \"" + ENTITY_PROPERTY_1 + "\": {\n" +
+            "            \"datatype\": \"date\",\n" +
+            "            \"facetable\": true,\n" +
+            "            \"collation\": \"http://marklogic.com/collation/codepoint\"\n" +
+            "          }\n" +
+            "        }\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }\n" +
+            "]";
+
+        controller.updateModelEntityTypes(readJsonArray(entityTypes));
+    }
+
+    private void addProperty() {
+        Assumptions.assumeTrue(isVersionCompatibleWith520Roles());
+
+        String entityTypes = "[\n" +
+            "  {\n" +
+            "    \"entityName\": \"" + MODEL_NAME + "\",\n" +
+            "    \"modelDefinition\": {\n" +
+            "      \"Customer\": {\n" +
+            "        \"required\": [],\n" +
+            "        \"pii\": [\n" +
+            "          \"" + ENTITY_PROPERTY_1 + "\"\n" +
+            "        ],\n" +
+            "        \"elementRangeIndex\": [\n" +
+            "          \"" + ENTITY_PROPERTY_1 + "\"\n" +
+            "        ],\n" +
+            "        \"properties\": {\n" +
+            "          \"" + ENTITY_PROPERTY_1 + "\": {\n" +
+            "            \"datatype\": \"date\",\n" +
+            "            \"facetable\": true,\n" +
+            "            \"collation\": \"http://marklogic.com/collation/codepoint\"\n" +
+            "          },\n" +
+            "          \"" + ENTITY_PROPERTY_2 + "\": {\n" +
+            "            \"datatype\": \"string\",\n" +
+            "            \"facetable\": true,\n" +
+            "            \"collation\": \"http://marklogic.com/collation/codepoint\"\n" +
+            "          }\n" +
+            "        }\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }\n" +
+            "]";
+
+        controller.updateModelEntityTypes(readJsonArray(entityTypes));
+    }
+
     private JsonNode loadModel(DatabaseClient client) {
         return client.newJSONDocumentManager().read("/entities/" + MODEL_NAME + ".entity.json", new JacksonHandle()).get();
     }
@@ -228,6 +337,23 @@ public class CreateAndUpdateModelTest extends AbstractModelTest {
         Stream.of(getHubConfig().getDbName(DatabaseKind.STAGING), getHubConfig().getDbName(DatabaseKind.FINAL)).forEach(databaseKind -> {
             verifyIndexes(databaseKind);
         });
+    }
+
+    private void getIndexes(Boolean isIndexDeleted) {
+        String json = new DatabaseManager(getHubClient().getManageClient()).getPropertiesAsJson(getHubConfig().getDbName(DatabaseKind.FINAL));
+        Database db = new DefaultResourceMapper(new API(getHubClient().getManageClient())).readResource(json, Database.class);
+        List<ElementIndex> rangeIndexes = db.getRangeElementIndex();
+        if(!isIndexDeleted) {
+            assertEquals("someProperty", rangeIndexes.get(rangeIndexes.size() - 2).getLocalname());
+            assertEquals("dateTime", rangeIndexes.get(rangeIndexes.size() - 2).getScalarType());
+            assertEquals("someProperty", rangeIndexes.get(rangeIndexes.size() - 1).getLocalname());
+            assertEquals("date", rangeIndexes.get(rangeIndexes.size() - 1).getScalarType());
+        }
+        else {
+            for(int i=0;i<rangeIndexes.size();i++){
+                assertNotEquals("dateTime", rangeIndexes.get(i).getScalarType());
+            }
+        }
     }
 
     private void verifyIndexes(String dbName) {
@@ -252,6 +378,17 @@ public class CreateAndUpdateModelTest extends AbstractModelTest {
         assertEquals(4, pathIndexes.size(), "OOTB indexes URIsToProcess and uris path indexes exists along with above deployed indexes in the test");
         pathIndexes.forEach(pathIndex -> pathExpressions.add(pathIndex.getPathExpression()));
         assertTrue(pathExpressions.containsAll(Arrays.asList("//*:instance/testPathIndexForDHFPROD4704", "/(es:envelope|envelope)/(es:instance|instance)/Customer/someOtherProperty")));
+    }
+
+    private void updateIndexes() {
+        ManageClient manageClient = getHubClient().getManageClient();
+        final String finalName = getHubConfig().getDbName(DatabaseKind.FINAL);
+
+        Database db = new Database(new API(manageClient), finalName);
+
+        db.setRangePathIndex(new ArrayList<>());
+        db.setRangeElementIndex(new ArrayList<>());
+        db.save();
     }
 
     private void loadUnrelatedIndexes() {
