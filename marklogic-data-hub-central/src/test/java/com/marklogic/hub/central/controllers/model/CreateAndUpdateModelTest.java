@@ -31,10 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CreateAndUpdateModelTest extends AbstractModelTest {
 
@@ -69,6 +66,15 @@ public class CreateAndUpdateModelTest extends AbstractModelTest {
     void testCreateNamespacedModel() {
         runAsTestUserWithRoles("hub-central-entity-model-writer");
         createNamespacedModel();
+    }
+
+    @Test
+    @WithMockUser(roles = {"writeEntityModel"})
+    void testUpdatedIndexes() {
+        runAsTestUserWithRoles("hub-central-entity-model-writer");
+        createModel();
+        updateModelEntityTypes();
+        updateModelEntityType();
     }
 
     private void createNamespacedModel() {
@@ -205,6 +211,52 @@ public class CreateAndUpdateModelTest extends AbstractModelTest {
         assertIndexDeployment();
 
         assertEquals("string", loadModel(getHubClient().getFinalClient()).get("definitions").get(MODEL_NAME).get("properties").get(ENTITY_PROPERTY_1).get("datatype").asText());
+        assertEquals("string", loadModel(getHubClient().getFinalClient()).get("definitions").get(MODEL_NAME).get("properties").get(ENTITY_PROPERTY_2).get("datatype").asText());
+    }
+
+    private void updateModelEntityType() {
+        Assumptions.assumeTrue(isVersionCompatibleWith520Roles());
+
+        // Loading unrelated indexes so that we can check for them after updating entity model
+        loadUnrelatedIndexes();
+
+        String entityTypes = "[\n" +
+            "  {\n" +
+            "    \"entityName\": \"" + MODEL_NAME + "\",\n" +
+            "    \"modelDefinition\": {\n" +
+            "      \"Customer\": {\n" +
+            "        \"required\": [],\n" +
+            "        \"pii\": [\n" +
+            "          \"" + ENTITY_PROPERTY_1 + "\"\n" +
+            "        ],\n" +
+            "        \"elementRangeIndex\": [\n" +
+            "          \"" + ENTITY_PROPERTY_1 + "\"\n" +
+            "        ],\n" +
+            "        \"properties\": {\n" +
+            "          \"" + ENTITY_PROPERTY_1 + "\": {\n" +
+            "            \"datatype\": \"string\",\n" +
+            "            \"collation\": \"http://marklogic.com/collation/codepoint\"\n" +
+            "          },\n" +
+            "          \"" + ENTITY_PROPERTY_2 + "\": {\n" +
+            "            \"datatype\": \"dateTime\",\n" +
+            "            \"facetable\": true,\n" +
+            "            \"collation\": \"http://marklogic.com/collation/codepoint\"\n" +
+            "          }\n" +
+            "        }\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }\n" +
+            "]";
+
+        controller.updateModelEntityTypes(readJsonArray(entityTypes));
+
+        assertSearchOptions(MODEL_NAME, Assertions::assertTrue, true);
+        assertPIIFilesDeployment();
+        assertIndexDeployment();
+
+        assertEquals("string", loadModel(getHubClient().getFinalClient()).get("definitions").get(MODEL_NAME).get("properties").get(ENTITY_PROPERTY_1).get("datatype").asText());
+        assertNotEquals("string", loadModel(getHubClient().getFinalClient()).get("definitions").get(MODEL_NAME).get("properties").get(ENTITY_PROPERTY_2).get("datatype").asText());
+        assertEquals("dateTime", loadModel(getHubClient().getFinalClient()).get("definitions").get(MODEL_NAME).get("properties").get(ENTITY_PROPERTY_2).get("datatype").asText());
     }
 
     private JsonNode loadModel(DatabaseClient client) {
